@@ -6,9 +6,12 @@ public class MapGrid {
 
     public final int CELL_SIZE = 60;
     public final int WINDOW_WIDTH = 1200;
-    public static int GAME_GRID_HEIGHT = 0;
 
     public MapGrid() {
+
+    }
+
+    public void update() {
 
     }
 
@@ -16,7 +19,6 @@ public class MapGrid {
         render.setColor(0, 0, 0, 1);
 
         //rows top to bottom
-        GAME_GRID_HEIGHT = 2 * CELL_SIZE;
         render.line(0, 2 * CELL_SIZE, WINDOW_WIDTH, 2 * CELL_SIZE);
         render.line(0, CELL_SIZE, 7 * CELL_SIZE, CELL_SIZE);
         //columns left to right

@@ -17,12 +17,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.mygdx.map.GameGrid;
 import com.mygdx.map.MapGrid;
 
 import java.util.logging.Logger;
-
-import static com.mygdx.map.MapGrid.GAME_GRID_HEIGHT;
 
 public class MyGdxGame extends ApplicationAdapter {
     Logger log = Logger.getLogger("log");
@@ -31,14 +28,14 @@ public class MyGdxGame extends ApplicationAdapter {
     public Sprite sprite;
     public ShapeRenderer render;
     public MapGrid grid;
-    public GameGrid gameGrid;
     public Stage stage;
     boolean isGamePaused;
     boolean isGateOpen;
+    int gridBorderCoordinateY;
     public BitmapFont font;
     public int money;
     public int mood;
-    private boolean isGameGridOn;
+
     public String myMoneyName;
     public String myMoodName;
 
@@ -52,16 +49,18 @@ public class MyGdxGame extends ApplicationAdapter {
         render = new ShapeRenderer();
         render.setAutoShapeType(true);
         grid = new MapGrid();
-        gameGrid = new GameGrid();
         Gdx.input.setInputProcessor(stage);
         isGamePaused = false;
         isGateOpen = false;
-        isGameGridOn = false;
+        gridBorderCoordinateY = 120;
 
         money = 5000;
         mood = 70;
-        myMoneyName = "Money : 5000";
+
+        myMoneyName = "Money : " + money;
         myMoodName = "Mood : 70";
+
+
 
         final ImageButton pauseButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(Textures.pauseButton)));
         pauseButton.setPosition(500, 12);
@@ -78,8 +77,8 @@ public class MyGdxGame extends ApplicationAdapter {
             }
         });
         final ImageButton gate = new ImageButton(new TextureRegionDrawable(new TextureRegion(Textures.gateClosed)));
-        gate.setPosition(2, 360);
-        //gate.setSize(60, 150);
+        gate.setPosition(1, 350);
+        gate.setSize(100, 100);
         stage.addActor(gate);
 
         final ImageButton openButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(Textures.openButton)));
@@ -122,18 +121,24 @@ public class MyGdxGame extends ApplicationAdapter {
         //    }
         //});
 
-        createDraggableGridButton(Textures.tileIcon, new NumberPair(6, 65), new NumberPair(50, 50), "tile", 10);
-        createDraggableGridButton(Textures.bushIcon, new NumberPair(4, 8), new NumberPair(50, 50), "bush", 10);
-        createDraggableGridButton(Textures.janitorIcon, new NumberPair(188, 5), new NumberPair(50, 50), "janitor", 10);
-        createDraggableGridButton(Textures.cleanerIcon, new NumberPair(127, 63), new NumberPair(50, 50), "cleaner", 10);
-        createDraggableGridButton(Textures.foodCartIcon, new NumberPair(127, 5), new NumberPair(50, 50), "foodCart", 10);
-        createDraggableGridButton(Textures.grassIcon, new NumberPair(185, 65), new NumberPair(50, 50), "grass", 10);
-        createDraggableGridButton(Textures.houseIcon, new NumberPair(245, 65), new NumberPair(50, 50), "house", 10);
-        createDraggableGridButton(Textures.trashcanIcon, new NumberPair(65, 5), new NumberPair(50, 50), "trash", 10);
-        createDraggableGridButton(Textures.treeIcon, new NumberPair(65, 65), new NumberPair(50, 50), "tree", 10);
+        createDraggableGridButton(Textures.tileIcon, new NumberPair(6, 65), new NumberPair(50, 50), "tile", 20);
+        createDraggableGridButton(Textures.bushIcon, new NumberPair(4, 8), new NumberPair(50, 50), "bush", 20);
+        createDraggableGridButton(Textures.janitorIcon, new NumberPair(188, 5), new NumberPair(50, 50), "janitor", 20);
+        createDraggableGridButton(Textures.cleanerIcon, new NumberPair(127, 63), new NumberPair(50, 50), "cleaner", 20);
+        createDraggableGridButton(Textures.foodCartIcon, new NumberPair(127, 5), new NumberPair(50, 50), "foodCart", 20);
+        createDraggableGridButton(Textures.grassIcon, new NumberPair(185, 65), new NumberPair(50, 50), "grass", 20);
+        createDraggableGridButton(Textures.houseIcon, new NumberPair(245, 65), new NumberPair(50, 50), "house", 20);
+        createDraggableGridButton(Textures.trashcanIcon, new NumberPair(65, 5), new NumberPair(50, 50), "trash", 20);
+        createDraggableGridButton(Textures.treeIcon, new NumberPair(65, 65), new NumberPair(50, 50), "tree", 20);
+        createDraggableGridButton(Textures.playgroundIcon, new NumberPair(245, 5), new NumberPair(50, 50), "playground", 80);
+        createDraggableGridButton(Textures.atmIcon, new NumberPair(305, 65), new NumberPair(50, 50), "atm", 20);
+        createDraggableGridButton(Textures.securityIcon, new NumberPair(305, 5), new NumberPair(50, 50), "security", 20);
+        createDraggableGridButton(Textures.shopIcon, new NumberPair(365, 65), new NumberPair(50, 50), "shop", 40);
+
     }
 
     private void createDraggableGridButton(final Texture buttonTexture, final NumberPair buttonPosition, final NumberPair buttonSize, final String name, final int zoomFactor) {
+
         final ImageButton gridButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(buttonTexture)));
         gridButton.setPosition(buttonPosition.getFirstNumber(), buttonPosition.getSecondNumber());
         gridButton.setSize(buttonSize.getFirstNumber(), buttonSize.getSecondNumber());
@@ -141,24 +146,23 @@ public class MyGdxGame extends ApplicationAdapter {
 
         gridButton.addListener(new DragListener() {
             public void drag(InputEvent event, float x, float y, int pointer) {
+                gridButton.setSize(buttonSize.getFirstNumber()+zoomFactor, buttonSize.getSecondNumber()+zoomFactor);
                 gridButton.moveBy(x - gridButton.getWidth() / 2, y - gridButton.getHeight() / 2);
-                isGameGridOn = true;
-            }
+                   }
 
             public void dragStop(InputEvent event, float x, float y, int pointer) {
-                if (gridButton.getY() >= GAME_GRID_HEIGHT) {
+                if (gridButton.getY() >= gridBorderCoordinateY) {
                     ImageButton gridButtonCopy = new ImageButton(new TextureRegionDrawable(new TextureRegion(buttonTexture)));
-                    NumberPair position = gameGrid.getCellCoordinates((int) gridButton.getX(), (int) gridButton.getY());
-                    gridButtonCopy.setPosition(position.getFirstNumber(), position.getSecondNumber());
-                    gridButtonCopy.setSize(buttonSize.getFirstNumber() + zoomFactor, buttonSize.getSecondNumber() + zoomFactor);
+                    gridButtonCopy.setPosition(gridButton.getX(), gridButton.getY());
+                    gridButtonCopy.setSize(buttonSize.getFirstNumber()+zoomFactor, buttonSize.getSecondNumber()+zoomFactor);
                     gridButtonCopy.setName(name);
                     stage.addActor(gridButtonCopy);
+                    gridButton.setPosition(buttonPosition.getFirstNumber(), buttonPosition.getSecondNumber());
                     //for(Actor actor : stage.getActors()) {
                     //	log.info(actor.getName()+"\n");
                     //}
                 }
                 resetButton(gridButton, buttonPosition, buttonSize);
-                isGameGridOn = false;
             }
         });
     }
@@ -175,10 +179,10 @@ public class MyGdxGame extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.begin();
-        batch.draw(Textures.background, 0, 0, 1200, 660);
+        batch.draw(Textures.background, 0, 0, 1200, 650);
         font.getData().setScale(2, 1);
         font.setColor(200.0f, 255.0f, 255.0f, 255.0f);
-        font.draw(batch, myMoneyName, 1000, 660);
+        font.draw(batch, myMoneyName, 1000, 650);
         font.draw(batch, myMoodName, 1000, 630);
         batch.end();
 
@@ -187,7 +191,6 @@ public class MyGdxGame extends ApplicationAdapter {
 
         render.begin();
         grid.render(render);
-        gameGrid.render(render, isGameGridOn);
         render.end();
     }
 
